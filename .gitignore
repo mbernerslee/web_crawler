@@ -21,6 +21,7 @@ erl_crash.dump
 
 # Ignore package tarball (built via "mix hex.build").
 web_crawler-*.tar
+web_crawler_output*.exs
 
 
 # Temporary files for e.g. tests
