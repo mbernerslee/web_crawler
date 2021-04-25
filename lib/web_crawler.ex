@@ -43,18 +43,6 @@ defmodule WebCrawler do
       {^path, :fetched}, {new_site_map, update_status} ->
         {Map.put(new_site_map, path, :fetched), update_status}
 
-      {^path, %{} = nested_sitemap}, {new_site_map, update_status} ->
-        {updated_nested_sitemap, update_status} =
-          build_updated_site_map(
-            nested_sitemap,
-            path,
-            links_from_path,
-            already_fetched_paths,
-            {%{}, update_status}
-          )
-
-        {Map.put(new_site_map, path, updated_nested_sitemap), update_status}
-
       {other_path, %{} = nested_sitemap}, {new_site_map, update_status} ->
         {updated_nested_sitemap, update_status} =
           build_updated_site_map(
