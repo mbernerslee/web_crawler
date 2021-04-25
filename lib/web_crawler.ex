@@ -68,7 +68,7 @@ defmodule WebCrawler do
   end
 
   defp find_next_path_to_http_get(site_map) do
-    find_next_path_to_http_get(site_map, {:cont, :not_found})
+    find_next_path_to_http_get(site_map, :not_found)
   end
 
   defp find_next_path_to_http_get(site_map, acc) do
@@ -83,7 +83,6 @@ defmodule WebCrawler do
         case find_next_path_to_http_get(nested_site_map, acc) do
           {:ok, path} -> {:halt, {:ok, path}}
           :not_found -> {:cont, :not_found}
-          {:cont, :not_found} -> {:cont, :not_found}
         end
     end)
   end
@@ -114,7 +113,7 @@ defmodule WebCrawler do
 
   defp determine_internal_links([link | rest], acc, domain, path, already_fetched_paths) do
     acc =
-      case parse_link(link, domain) do
+      case internal_or_external_link(link, domain) do
         {:internal_link, link} ->
           if link == path or MapSet.member?(already_fetched_paths, link) do
             [{link, :fetched} | acc]
@@ -129,7 +128,7 @@ defmodule WebCrawler do
     determine_internal_links(rest, acc, domain, path, already_fetched_paths)
   end
 
-  defp parse_link(link, domain) do
+  defp internal_or_external_link(link, domain) do
     %{domain: this_domain, path: path} = parse_url(link)
 
     case {this_domain, String.starts_with?(path, "/")} do
