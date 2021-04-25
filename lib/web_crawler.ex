@@ -72,16 +72,12 @@ defmodule WebCrawler do
     url = "https://#{domain}#{path}"
     unless Mix.env() == :test, do: IO.inspect("crawling ... #{url}")
 
-    html = make_http_get_request!(url).body
+    html = Application.get_env(:web_crawler, :http_module).get!(url).body
 
     ~r|href="([^"]+)"|
     |> Regex.scan(html, capture: :all_but_first)
     |> List.flatten()
     |> determine_internal_links(domain, path, already_fetched_paths)
-  end
-
-  defp make_http_get_request!(url) do
-    Application.get_env(:web_crawler, :http_module).get!(url)
   end
 
   defp determine_internal_links(links, domain, path, already_fetched_paths) do
