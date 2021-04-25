@@ -38,6 +38,20 @@ defmodule WebCrawlerTest do
       assert %{
                domain: "farm.io",
                site_map: %{
+                 "/secret_link_one" => %{
+                   "/secret_link_one" => :fetched,
+                   "/secret_link_two" => %{
+                     "/secret_link_one" => :fetched,
+                     "/secret_link_two" => :fetched
+                   }
+                 }
+               }
+             } ==
+               WebCrawler.crawl("http://farm.io/secret_link_one")
+
+      assert %{
+               domain: "farm.io",
+               site_map: %{
                  "/" => %{
                    "/animals" => %{
                      "/animals/mammals" => %{
@@ -59,20 +73,6 @@ defmodule WebCrawlerTest do
                }
              } ==
                WebCrawler.crawl("http://farm.io/")
-
-      assert %{
-               domain: "farm.io",
-               site_map: %{
-                 "/secret_link_one" => %{
-                   "/secret_link_one" => :fetched,
-                   "/secret_link_two" => %{
-                     "/secret_link_one" => :fetched,
-                     "/secret_link_two" => :fetched
-                   }
-                 }
-               }
-             } ==
-               WebCrawler.crawl("http://farm.io/secret_link_one")
     end
 
     test "returns the same output with or without a trailing / in the URL" do
