@@ -17,7 +17,7 @@ defmodule WebCrawler.ResultParser.Real do
 
     filename = "web_crawler_output_#{count}.exs"
 
-    IO.puts("writing sitemap to #{filename}...")
+    IO.puts("writing sitemap to file '#{filename}' ...")
 
     File.write!(
       filename,
