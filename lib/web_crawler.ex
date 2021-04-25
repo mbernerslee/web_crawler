@@ -11,11 +11,13 @@ defmodule WebCrawler do
         Application.get_env(:web_crawler, :result_module).parse_result(domain, site_map)
 
       {:ok, path} ->
+        already_fetched_paths = MapSet.put(already_fetched_paths, path)
+
         links_from_path = get_linked_paths(domain, path, already_fetched_paths)
 
         site_map = build_updated_site_map(site_map, path, links_from_path)
 
-        crawl(domain, site_map, MapSet.put(already_fetched_paths, path))
+        crawl(domain, site_map, already_fetched_paths)
     end
   end
 
@@ -92,7 +94,7 @@ defmodule WebCrawler do
     acc =
       case internal_or_external_link(link, domain) do
         {:internal_link, link} ->
-          if link == path or MapSet.member?(already_fetched_paths, link) do
+          if MapSet.member?(already_fetched_paths, link) do
             [{link, :fetched} | acc]
           else
             [{link, :unfetched} | acc]
