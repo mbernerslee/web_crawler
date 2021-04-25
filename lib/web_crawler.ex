@@ -13,26 +13,20 @@ defmodule WebCrawler do
       {:ok, path} ->
         links_from_path = get_linked_paths(domain, path, already_fetched_paths)
 
-        site_map = build_updated_site_map(site_map, path, links_from_path, already_fetched_paths)
+        site_map = build_updated_site_map(site_map, path, links_from_path)
 
         crawl(domain, site_map, MapSet.put(already_fetched_paths, path))
     end
   end
 
-  defp build_updated_site_map(site_map, path, links_from_path, already_fetched_paths) do
+  defp build_updated_site_map(site_map, path, links_from_path) do
     {site_map, _} =
-      build_updated_site_map(
-        site_map,
-        path,
-        links_from_path,
-        already_fetched_paths,
-        {%{}, :not_updated_yet}
-      )
+      build_updated_site_map(site_map, path, links_from_path, {%{}, :not_updated_yet})
 
     site_map
   end
 
-  defp build_updated_site_map(site_map, path, links_from_path, already_fetched_paths, acc) do
+  defp build_updated_site_map(site_map, path, links_from_path, acc) do
     Enum.reduce(site_map, acc, fn
       {^path, :unfetched}, {new_site_map, :not_updated_yet} ->
         {Map.put(new_site_map, path, links_from_path), :updated}
@@ -45,24 +39,11 @@ defmodule WebCrawler do
 
       {other_path, %{} = nested_sitemap}, {new_site_map, update_status} ->
         {updated_nested_sitemap, update_status} =
-          build_updated_site_map(
-            nested_sitemap,
-            path,
-            links_from_path,
-            already_fetched_paths,
-            {%{}, update_status}
-          )
+          build_updated_site_map(nested_sitemap, path, links_from_path, {%{}, update_status})
 
         {Map.put(new_site_map, other_path, updated_nested_sitemap), update_status}
 
-      {other_path, _}, {new_site_map, update_status} ->
-        fetched_status =
-          if MapSet.member?(already_fetched_paths, other_path) do
-            :fetched
-          else
-            :unfetched
-          end
-
+      {other_path, fetched_status}, {new_site_map, update_status} ->
         {Map.put(new_site_map, other_path, fetched_status), update_status}
     end)
   end
