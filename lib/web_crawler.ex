@@ -55,19 +55,6 @@ defmodule WebCrawler do
 
         {Map.put(new_site_map, path, updated_nested_sitemap), update_status}
 
-      {other_path, :unfetched}, {new_site_map, update_status} ->
-        fetched_status =
-          if MapSet.member?(already_fetched_paths, other_path) do
-            :fetched
-          else
-            :unfetched
-          end
-
-        {Map.put(new_site_map, other_path, fetched_status), update_status}
-
-      {other_path, :fetched}, {new_site_map, update_status} ->
-        {Map.put(new_site_map, other_path, :fetched), update_status}
-
       {other_path, %{} = nested_sitemap}, {new_site_map, update_status} ->
         {updated_nested_sitemap, update_status} =
           build_updated_site_map(
@@ -79,6 +66,16 @@ defmodule WebCrawler do
           )
 
         {Map.put(new_site_map, other_path, updated_nested_sitemap), update_status}
+
+      {other_path, _}, {new_site_map, update_status} ->
+        fetched_status =
+          if MapSet.member?(already_fetched_paths, other_path) do
+            :fetched
+          else
+            :unfetched
+          end
+
+        {Map.put(new_site_map, other_path, fetched_status), update_status}
     end)
   end
 
